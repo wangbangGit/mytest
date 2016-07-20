@@ -18,5 +18,22 @@
     <ClCompile Include="server_main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="clientmgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdfx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="clientmgr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

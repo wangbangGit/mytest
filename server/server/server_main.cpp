@@ -1,6 +1,4 @@
-#include<iostream>
-#include"lxnet.h"
-#include"msgbase.h"
+#include"stdfx.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -13,8 +11,25 @@
 #define system(a)
 #endif
 
+void run()
+{
+	while (1)
+	{
+		lxnet::net_run();
+		clientmgr::Instance().run();
+		delaytime(100);
+		clientmgr::Instance().endrun();
+	}
+}
+
 int main(void)
 {
+	if (!config::Instance().init())
+	{
+		std::cout << "init config error!" << std::endl;
+		system("pause");
+		return 0;
+	}
 	//初始化
 	if (!lxnet::net_init(512, 1, 1024 * 32, 100, 1, 4, 1))
 	{
@@ -22,69 +37,11 @@ int main(void)
 		system("pause");
 		return 0;
 	}
-
-	lxnet::Listener *list = lxnet::Listener::Create();
-	if (!list || !list->Listen(30012, 10))
-	{
-		std::cout << "listen error!" << std::endl;
-		system("pause");
-		return 1;
-	}
-
-	std::cout << "listen succeed!" << std::endl;
-
-	MessagePack sendpack;
-	MessagePack *recvpack;
-	char neirong[1024 * 30] = "a1234567";
-	int size = sizeof(neirong);
-	sendpack.PushBlock(neirong, size);
-
-	//新连接
-	lxnet::Socketer *newclient = NULL;
-	while (1)
-	{
-		delaytime(100);
-
-		lxnet::net_run();
-		if(!list->CanAccept())
-			continue;
-
-		if(!(newclient = list->Accept()))
-			continue;
-
-		std::cout << "accept succeed!" << std::endl;
-		break;
-	}
-
-	newclient->SetSendLimit(-1);
-	newclient->CheckRecv();
-
-	while (1)
-	{
-		recvpack = (MessagePack *)newclient->GetMsg();
-		if (recvpack)
-		{
-			newclient->SendMsg(&sendpack);
-			newclient->CheckSend();
-		}
-		else
-		{
-			delaytime(0);
-		}
-
-		if (newclient->IsClose())
-		{
-			lxnet::Socketer::Release(newclient);
-			newclient = NULL;
-			break;
-		}
-
-		lxnet::net_run();
-	}
-
+	clientmgr::Instance().init(config::Instance().GetListenPort());
+	run();
+	clientmgr::Instance().release();
 	delaytime(1000);
 
-	lxnet::Listener::Release(list);
 	lxnet::net_release();
 	system("pause");
 	return 0;
