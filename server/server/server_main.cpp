@@ -11,14 +11,20 @@
 #define system(a)
 #endif
 
+int64 g_currenttime;
+bool g_run;
 void run()
 {
-	while (1)
+	int delay;
+	while (g_run)
 	{
+		g_currenttime = get_millisecond();
 		lxnet::net_run();
 		clientmgr::Instance().run();
-		delaytime(100);
 		clientmgr::Instance().endrun();
+		delay = static_cast<int>(get_millisecond() - g_currenttime);
+		if (delay < 100)
+			delaytime(100 - delay);
 	}
 }
 
@@ -38,6 +44,7 @@ int main(void)
 		return 0;
 	}
 	clientmgr::Instance().init(config::Instance().GetListenPort());
+	g_run = true;
 	run();
 	clientmgr::Instance().release();
 	delaytime(1000);

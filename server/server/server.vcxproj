@@ -124,11 +124,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="client.cpp" />
     <ClCompile Include="clientmgr.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="server_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\base\cmd.h" />
+    <ClInclude Include="..\base\msgdef.h" />
+    <ClInclude Include="client.h" />
     <ClInclude Include="clientmgr.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="stdfx.h" />

@@ -1,4 +1,8 @@
 #include"stdfx.h"
+#include"msgbase.h"
+
+extern int64 g_currenttime;
+extern bool g_run;
 
 clientmgr::clientmgr()
 {
@@ -35,7 +39,7 @@ void clientmgr::release()
 {
 	for (auto &i : m_client_list)
 	{
-		lxnet::Socketer::Release(i);
+		OnClientDisconnect(i);
 	}
 
 	lxnet::Listener::Release(m_listen);
@@ -65,22 +69,30 @@ void clientmgr::testandlisten()
 
 void clientmgr::acceptnewclient()
 {
-	lxnet::Socketer *newclient = NULL;
+	lxnet::Socketer *socket = NULL;
 
 	for (int i = 0; i < s_backlog; ++i)
 	{
 		if (!m_listen->CanAccept())
 			return;
 
-		if (!(newclient = m_listen->Accept()))
+		if (!(socket = m_listen->Accept()))
 			return;
 
-		newclient->SetSendLimit(-1);
+		//这边可以做一个client pool
+		client *newclient = new client;
+		assert(newclient != NULL);
 
+		socket->SetSendLimit(-1);
+		char ip[128];
+		socket->GetIP(ip, sizeof(ip) - 1);
+
+		newclient->SetSocket(socket);
+		newclient->SetConnectTime(g_currenttime);
+		newclient->SetPingTime(g_currenttime);
+		newclient->SetIP(ip);
 		m_client_list.insert(newclient);
 
-		char ip[128];
-		newclient->GetIP(ip, sizeof(ip) - 1);
 		printf("accept new client, ip:%s\n", ip);
 	}
 }
@@ -88,25 +100,80 @@ void clientmgr::acceptnewclient()
 void clientmgr::processallclient()
 {
 	MessagePack *recvpack = NULL;
-	std::set<lxnet::Socketer *>::iterator iter, tempiter;
+	std::set<client *>::iterator iter, tempiter;
 	for (iter = m_client_list.begin(); iter != m_client_list.end();)
 	{
 		tempiter = iter;
 		iter ++;
 
-		if ((*tempiter)->IsClose())
+		if ((*tempiter)->GetSocket()->IsClose())
 		{
-			lxnet::Socketer::Release((*tempiter));
+			OnClientDisconnect(*tempiter);
 			m_client_list.erase((*tempiter));
 			continue;
 		}
 
-		recvpack = (MessagePack *)(*tempiter)->GetMsg();
-		if (recvpack)
+		processallclientmsg(*tempiter);
+	}
+}
+
+void clientmgr::processallclientmsg(client *cl)
+{
+	assert(cl != NULL);
+	Msg *pMsg = NULL;
+	while (1)
+	{
+		pMsg = cl->GetMsg();
+		if (!pMsg)
+			break;
+		switch (pMsg->GetType())
 		{
-			std::cout << "get msg!" << std::endl;
+		case MSG_PING:
+		{
+			//MsgPing msg;
+			cl->SendMsg(pMsg);
+			cl->SetPingTime(g_currenttime);
+			break;
+		}
+		case MSG_END:
+		{
+			//g_run = false;
+			std::cout << cl->GetIP() << ":get end msg" << std::endl;
+			break;
+		}
+		case MSG_CHAT:
+		{
+			SendMsgToAll(pMsg,cl);
+			break;
+		}
+		default:
+		{
+			std::cout << "msg type error!" << std::endl;
+		}
 		}
 	}
+}
+
+void clientmgr::SendMsgToAll(Msg *pMsg,client *cl)
+{
+	for (auto &i : m_client_list)
+	{
+		if (cl != NULL)
+		{
+			if(i == cl)
+				continue;
+		}
+		i->SendMsg(pMsg);
+	}
+}
+
+void clientmgr::OnClientDisconnect(client *cl)
+{
+	assert(cl != NULL);
+	std::cout << "client disconnect! ip:" << cl->GetIP() << std::endl;
+	cl->~client();
+	delete cl;
+	cl = NULL;
 }
 
 void clientmgr::run()
@@ -121,7 +188,7 @@ void clientmgr::endrun()
 {
 	for (auto &i : m_client_list)
 	{
-		i->CheckRecv();
-		i->CheckSend();
+		i->GetSocket()->CheckRecv();
+		i->GetSocket()->CheckSend();
 	}
 }

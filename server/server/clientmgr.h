@@ -1,5 +1,6 @@
 #pragma once
 #include<set>
+#include"lxnet.h"
 
 static const int s_backlog = 128;
 
@@ -20,8 +21,15 @@ public:
 	void testandlisten();
 	void acceptnewclient();
 	void processallclient();
+	void processallclientmsg(client *cl);
 	void run();
 	void endrun();
+
+public:
+	void SendMsgToAll(Msg *pMsg,client *cl = NULL);
+
+private:
+	void OnClientDisconnect(client *cl);
 
 private:
 	int m_listen_port;
@@ -29,5 +37,5 @@ private:
 
 	lxnet::Listener *m_listen;
 
-	std::set<lxnet::Socketer *> m_client_list;
+	std::set<client *> m_client_list;
 };

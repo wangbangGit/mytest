@@ -1,7 +1,7 @@
 #include<iostream>
 #include"lxnet.h"
-#include"msgbase.h"
 #include "crosslib.h"
+#include"msgdef.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -40,10 +40,13 @@ int main(void)
 	int size = sizeof(neirong);
 	sendpack.PushBlock(neirong, size);
 
+	MsgPing msg;
+	MsgEnd endmsg;
+
 	int sendnum = 0;
 	int64 begin, end;
 	begin = get_millisecond();
-	newclient->SendMsg(&sendpack);
+	newclient->SendMsg(&msg);
 	newclient->CheckSend();
 	newclient->CheckRecv();
 	sendnum++;
@@ -53,11 +56,13 @@ int main(void)
 		recvpack = (MessagePack *)newclient->GetMsg();
 		if (recvpack)
 		{
-			newclient->SendMsg(&sendpack);
+			newclient->SendMsg(&msg);
 			newclient->CheckSend();
 			sendnum++;
 			if (sendnum == 10000)
 			{
+				newclient->SendMsg(&endmsg);
+				newclient->CheckSend();
 				end = get_millisecond();
 				std::cout << "end - begin:" << (int)(end - begin) << std::endl;
 				break;
@@ -73,7 +78,6 @@ int main(void)
 
 		lxnet::net_run();
 	}
-
 	delaytime(1000);
 
 	lxnet::Socketer::Release(newclient);
