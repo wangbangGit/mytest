@@ -1,8 +1,10 @@
 #pragma once
 #include<iostream>
+#include<set>
 #include<assert.h>
-#include"cmd.h"
-#include"msgdef.h"
 #include"config.h"
+#include"msgdef.h"
+#include"lxnet.h"
 #include"client.h"
 #include"clientmgr.h"
+#include"crosslib.h"

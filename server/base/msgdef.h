@@ -1,3 +1,9 @@
+/*
+*
+*	消息体定义
+*
+*/
+
 #pragma once
 #include"cmd.h"
 #include"msgbase.h"

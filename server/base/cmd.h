@@ -1,3 +1,9 @@
+/*
+*
+*	消息号定义
+*
+*/
+
 #pragma once
 
 enum

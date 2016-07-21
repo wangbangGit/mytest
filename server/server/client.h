@@ -1,6 +1,10 @@
+/*
+*
+*	Client¶ÔÏó
+*
+*/
+
 #pragma once
-#include"lxnet.h"
-#include"crosslib.h"
 
 class client
 {

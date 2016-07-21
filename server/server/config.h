@@ -1,3 +1,9 @@
+/*
+*
+*	server≈‰÷√
+*
+*/
+
 #pragma once
 
 class config

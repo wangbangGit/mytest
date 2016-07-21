@@ -1,6 +1,10 @@
+/*
+*
+*	Client链接管理类
+*
+*/
+
 #pragma once
-#include<set>
-#include"lxnet.h"
 
 static const int s_backlog = 128;
 
