@@ -130,20 +130,25 @@ void clientmgr::processclientmsg(client *cl)
 		{
 		case MSG_PING:
 		{
-			//MsgPing msg;
+			//收到ping消息的时候，也发送ping消息给前端，然后设置ping消息的接受时间
 			cl->SendMsg(pMsg);
 			cl->SetPingTime(g_currenttime);
 			break;
 		}
 		case MSG_END:
 		{
-			//g_run = false;
 			std::cout << cl->GetIP() << ":get end msg" << std::endl;
 			break;
 		}
 		case MSG_CHAT:
 		{
-			SendMsgToAll(pMsg,cl);
+			//把收到的chat消息发给所有在线的client
+			MessagePack * msg = (MessagePack *)pMsg;
+			char stBuff[521] = { 0 };
+			msg->Begin();
+			msg->GetString(stBuff, 512);
+			std::cout << cl->GetIP() << ":" << stBuff << std::endl;
+			SendMsgToAll(msg);
 			break;
 		}
 		default:

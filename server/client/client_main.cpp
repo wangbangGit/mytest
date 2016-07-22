@@ -1,4 +1,6 @@
 #include<iostream>
+#include<thread>//c++ 11多线程
+#include<string>
 #include"lxnet.h"
 #include "crosslib.h"
 #include"msgdef.h"
@@ -14,6 +16,89 @@
 #define system(a)
 #endif
 
+static bool g_run;
+
+//每5秒给server发送一个ping
+void PingMsg(lxnet::Socketer *clientsocket)
+{
+	MsgPing msg;
+	while (g_run)
+	{
+		if (!clientsocket || clientsocket->IsClose())
+		{
+			g_run = false;
+			break;
+		}
+		clientsocket->SendMsg(&msg);
+		delaytime(5000);
+	}
+	std::cout << "Ping task end!" << std::endl;
+}
+
+//用于用户输入
+void InputMsg(lxnet::Socketer *clientsocket)
+{
+	MessagePack msg;
+	std::string str;
+	msg.SetType(MSG_CHAT);
+	while (g_run)
+	{
+		if (!clientsocket || clientsocket->IsClose())
+		{
+			g_run = false;
+			break;
+		}
+
+		std::cin >> str;
+
+		if (str == "quit")
+			break;
+
+		msg.Reset();
+		msg.PushString(str.c_str());
+		clientsocket->SendMsg(&msg);
+
+		delaytime(10);
+	}
+	std::cout << "Input task end!" << std::endl;
+}
+
+void PrintMsg(lxnet::Socketer *clientsocket)
+{
+	MessagePack *recvpack = NULL;
+	while (g_run)
+	{
+		if (!clientsocket || clientsocket->IsClose())
+		{
+			g_run = false;
+			break;
+		}
+
+		recvpack = (MessagePack *)clientsocket->GetMsg();
+		if (recvpack)
+		{
+			switch (recvpack->GetType())
+			{
+			case MSG_CHAT:
+			{
+				char stBuff[521] = { 0 };
+				recvpack->Begin();
+				recvpack->GetString(stBuff, 512);
+				std::cout << "Get Msg From Server: " << stBuff << std::endl;
+				break;
+			}
+			default:
+			{
+
+			}
+			}
+		}
+		else
+			delaytime(10);
+	}
+	std::cout << "Print task end!" << std::endl;
+}
+
 int main(void)
 {
 	//初始化网络库
@@ -27,6 +112,13 @@ int main(void)
 	//创建socket
 	lxnet::Socketer *newclient = lxnet::Socketer::Create();
 
+	if (!newclient)
+	{
+		std::cout << "create client socketer error!" << std::endl;
+		system("pause");
+		return 0;
+	}
+
 	//每100毫秒尝试连接
 	while (!newclient->Connect("127.0.0.1", 30012))
 	{
@@ -35,55 +127,37 @@ int main(void)
 
 	std::cout << " connect succeed!" << std::endl;
 
-	MessagePack *recvpack;
-
-	MsgPing msg;
-	MsgEnd endmsg;
-
-	int sendnum = 0;
-	int64 begin, end;
-	begin = get_millisecond();
-	//发送消息
-	newclient->SendMsg(&msg);
-	//真正的发送，每次sendmsg之后，进行该操作才会真正的把消息发送出去
-	newclient->CheckSend();
-	//投递接受消息，该操作之后，就可以收到来自服务端的消息了
+	//尝试投递接取消息
 	newclient->CheckRecv();
-	sendnum++;
+
+	g_run = true;
+
+	//创建三个线程
+	//心跳
+	std::thread PingTask(PingMsg, newclient);
+	//输入
+	std::thread InputTask(InputMsg, newclient);
+	//将线程分离
+	InputTask.detach();
+	//接受输出
+	std::thread PrintTask(PrintMsg, newclient);
 
 	//死循环
 	while (1)
 	{
-		//尝试获取服务端发来的消息
-		recvpack = (MessagePack *)newclient->GetMsg();
-		if (recvpack)
-		{
-			//收到服务端的消息的时候
-			//给服务端发送ping消息
-			newclient->SendMsg(&msg);
-			newclient->CheckSend();
-			sendnum++;
-			if (sendnum == 10000)
-			{
-				//当发送次数到1W的时候，发送endmsg
-				newclient->SendMsg(&endmsg);
-				newclient->CheckSend();
-				end = get_millisecond();
-				std::cout << "end - begin:" << (int)(end - begin) << std::endl;
-				break;
-			}
-		}
-		else
-		{
-			delaytime(0);
-		}
-
-		//当连接断开的时候跳出
-		if (newclient->IsClose())
+		lxnet::net_run();
+		if (!newclient || newclient->IsClose())
 			break;
 
-		lxnet::net_run();
+		delaytime(100);
+
+		newclient->CheckSend();
 	}
+
+	//等待线程结束--阻塞
+	PingTask.join();
+	PrintTask.join();
+
 	delaytime(1000);
 
 	lxnet::Socketer::Release(newclient);
