@@ -113,11 +113,11 @@ void clientmgr::processallclient()
 			continue;
 		}
 
-		processallclientmsg(*tempiter);
+		processclientmsg(*tempiter);
 	}
 }
 
-void clientmgr::processallclientmsg(client *cl)
+void clientmgr::processclientmsg(client *cl)
 {
 	assert(cl != NULL);
 	Msg *pMsg = NULL;
