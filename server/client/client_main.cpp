@@ -52,7 +52,10 @@ void InputMsg(lxnet::Socketer *clientsocket)
 		std::cin >> str;
 
 		if (str == "quit")
+		{
+			g_run = false;
 			break;
+		}
 
 		msg.Reset();
 		msg.PushString(str.c_str());
@@ -143,7 +146,7 @@ int main(void)
 	std::thread PrintTask(PrintMsg, newclient);
 
 	//ËÀÑ­»·
-	while (1)
+	while (g_run)
 	{
 		lxnet::net_run();
 		if (!newclient || newclient->IsClose())
