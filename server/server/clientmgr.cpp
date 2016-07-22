@@ -93,7 +93,7 @@ void clientmgr::acceptnewclient()
 		newclient->SetIP(ip);
 		m_client_list.insert(newclient);
 
-		printf("accept new client, ip:%s\n", ip);
+		std::cout << "accept new client, ip:" << ip << std::endl;
 	}
 }
 
