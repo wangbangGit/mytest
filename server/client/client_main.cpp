@@ -82,6 +82,13 @@ void PrintMsg(lxnet::Socketer *clientsocket)
 		{
 			switch (recvpack->GetType())
 			{
+			case MSG_PING:
+			{
+				recvpack->Begin();
+				MsgPing *msg = (MsgPing *)recvpack;
+				std::cout << "Server Time :" << msg->m_servertime << std::endl;
+				break;
+			}
 			case MSG_CHAT:
 			{
 				char stBuff[521] = { 0 };

@@ -20,6 +20,8 @@ public:
 
 	bool init();
 	int GetListenPort() { return m_listen_port; }
+	int GetClientOverTime() { return m_clientovertime; }
 private:
 	int m_listen_port;
+	int m_clientovertime;
 };

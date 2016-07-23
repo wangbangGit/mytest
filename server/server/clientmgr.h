@@ -21,7 +21,7 @@ public:
 	}
 
 	//初始化--指定监听端口和创建listener
-	void init(int port);
+	bool init(int port,int clientovertime);
 	//释放资源
 	void release();
 	//尝试启动监听
@@ -49,6 +49,8 @@ private:
 	int m_listen_port;
 	//是否需要Listen()
 	bool m_needlisten;
+	//超时时间
+	int m_clientovertime;
 
 	//listener
 	lxnet::Listener *m_listen;

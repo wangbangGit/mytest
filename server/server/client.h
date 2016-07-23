@@ -21,12 +21,8 @@ public:
 	void SetConnectTime(int64 currenttime) { m_connecttime = currenttime; }
 	//设置ping的时间
 	void SetPingTime(int64 currenttime) { m_pingtime = currenttime; }
-	//设置需要被移除的时间
-	void SetRemoveTime(int64 currenttime) { m_removetime = currenttime + enum_remove_delay_time; }
-	//是否需要移除
-	bool bNeedRemove() { return m_removetime != 0; }
-	//是否可以移除
-	bool bCanRemove(int64 currenttime);
+	//是否超时
+	bool bOverTime(int64 currenttime,int clientovertime);
 
 public:
 	
@@ -46,7 +42,6 @@ private:
 
 	int64 m_connecttime;	//连接时间
 	int64 m_pingtime;		//ping的时间
-	int64 m_removetime;		//需要被移除的时间
 
 	char m_ip[128];
 	//该client的socket

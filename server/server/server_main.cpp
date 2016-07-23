@@ -58,7 +58,13 @@ int main(void)
 		return 0;
 	}
 	//设置监听端口，创建listener
-	clientmgr::Instance().init(config::Instance().GetListenPort());
+	if (!clientmgr::Instance().init(config::Instance().GetListenPort(), config::Instance().GetClientOverTime()))
+	{
+		std::cout << "init clientmgr error!" << std::endl;
+		system("pause");
+		return 0;
+	}
+
 	g_run = true;
 	//死循环
 	run();

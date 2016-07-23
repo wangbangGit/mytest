@@ -10,10 +10,12 @@
 
 struct MsgPing :public Msg
 {
+	int64 m_servertime;
 	MsgPing()
 	{
 		SetLength(sizeof(*this));
 		SetType(MSG_PING);
+		m_servertime = 0;
 	}
 };
 

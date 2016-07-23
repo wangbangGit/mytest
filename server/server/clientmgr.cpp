@@ -8,6 +8,7 @@ clientmgr::clientmgr()
 {
 	m_listen_port = 0;
 	m_needlisten = false;
+	m_clientovertime = 0;
 	m_listen = NULL;
 	m_client_list.clear();
 }
@@ -16,23 +17,25 @@ clientmgr::~clientmgr()
 {
 	m_listen_port = 0;
 	m_needlisten = false;
+	m_clientovertime = 0;
 	m_listen = NULL;
 	m_client_list.clear();
 }
 
-void clientmgr::init(int port)
+bool clientmgr::init(int port, int clientovertime)
 {
 	m_listen_port = port;
+	m_clientovertime = clientovertime;
 
 	m_listen = lxnet::Listener::Create();
 	if (!m_listen)
 	{
 		std::cout << "create Listener failed!" << std::endl;
+		return false;
 	}
-	else
-	{
-		m_needlisten = true;
-	}
+
+	m_needlisten = true;
+	return true;
 }
 
 void clientmgr::release()
@@ -83,6 +86,17 @@ void clientmgr::acceptnewclient()
 		client *newclient = new client;
 		assert(newclient != NULL);
 
+// 		//启用压缩
+// 		socket->UseCompress();
+// 		//启用解压缩
+// 		socket->UseUncompress();
+// 		//弃用解密
+// 		socket->UseDecrypt();
+// 		//启用加密
+// 		socket->UseEncrypt();
+// 		//设置接手数据字节的临界值
+// 		socket->SetRecvLimit(16 * 1024);
+		//设置发送数据字节的临界值
 		socket->SetSendLimit(-1);
 		char ip[128];
 		socket->GetIP(ip, sizeof(ip) - 1);
@@ -106,8 +120,17 @@ void clientmgr::processallclient()
 		tempiter = iter;
 		iter ++;
 
+		if ((*tempiter)->bOverTime(g_currenttime,m_clientovertime))
+		{
+			std::cout << "client is over time! ip:" << (*tempiter)->GetIP() << std::endl;
+			OnClientDisconnect(*tempiter);
+			m_client_list.erase((*tempiter));
+			continue;
+		}
+
 		if ((*tempiter)->GetSocket()->IsClose())
 		{
+			std::cout << "client is close! ip:" << (*tempiter)->GetIP() << std::endl;
 			OnClientDisconnect(*tempiter);
 			m_client_list.erase((*tempiter));
 			continue;
@@ -131,8 +154,13 @@ void clientmgr::processclientmsg(client *cl)
 		case MSG_PING:
 		{
 			//收到ping消息的时候，也发送ping消息给前端，然后设置ping消息的接受时间
-			cl->SendMsg(pMsg);
-			cl->SetPingTime(g_currenttime);
+			MsgPing* msg = (MsgPing*)pMsg;
+			if (msg)
+			{
+				msg->m_servertime = g_currenttime;
+				cl->SendMsg(pMsg);
+				cl->SetPingTime(g_currenttime);
+			}
 			break;
 		}
 		case MSG_END:

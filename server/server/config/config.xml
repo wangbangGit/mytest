@@ -3,5 +3,6 @@
 <config 
 	
 	listen_port = "30012"
+	client_over_time = "6000"
 	>
 </config>
