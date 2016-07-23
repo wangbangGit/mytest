@@ -135,8 +135,14 @@ int main(void)
 		delaytime(100);
 	}
 
-	std::cout << " connect succeed!" << std::endl;
+	std::cout << "connect succeed!" << std::endl;
 
+	//启用解压缩
+	newclient->UseUncompress();
+	//启用加密
+	newclient->UseEncrypt();
+	//启用解密
+	newclient->UseDecrypt();
 	//尝试投递接取消息
 	newclient->CheckRecv();
 

@@ -86,14 +86,12 @@ void clientmgr::acceptnewclient()
 		client *newclient = new client;
 		assert(newclient != NULL);
 
-// 		//启用压缩
-// 		socket->UseCompress();
-// 		//启用解压缩
-// 		socket->UseUncompress();
-// 		//弃用解密
-// 		socket->UseDecrypt();
-// 		//启用加密
-// 		socket->UseEncrypt();
+ 		//启用压缩
+ 		socket->UseCompress();
+ 		//启用解密
+		socket->UseDecrypt();
+ 		//启用加密
+ 		socket->UseEncrypt();
 // 		//设置接手数据字节的临界值
 // 		socket->SetRecvLimit(16 * 1024);
 		//设置发送数据字节的临界值
