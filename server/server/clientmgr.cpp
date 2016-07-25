@@ -85,6 +85,10 @@ void clientmgr::acceptnewclient()
 		//这边可以做一个client pool
 		client *newclient = new client;
 		assert(newclient != NULL);
+		if (!newclient)
+		{
+			return;
+		}
 
  		//启用压缩
  		socket->UseCompress();
@@ -141,6 +145,9 @@ void clientmgr::processallclient()
 void clientmgr::processclientmsg(client *cl)
 {
 	assert(cl != NULL);
+	if (cl == NULL)
+		return;
+
 	Msg *pMsg = NULL;
 	while (1)
 	{
@@ -201,6 +208,8 @@ void clientmgr::SendMsgToAll(Msg *pMsg,client *cl)
 void clientmgr::OnClientDisconnect(client *cl)
 {
 	assert(cl != NULL);
+	if (cl == NULL)
+		return;
 	std::cout << "client disconnect! ip:" << cl->GetIP() << std::endl;
 	cl->~client();
 	delete cl;

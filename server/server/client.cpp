@@ -44,12 +44,16 @@ void client::SendMsg(Msg *pMsg)
 	if (!pMsg)
 		return;
 	assert(m_socket != NULL);
+	if (!m_socket)
+		return ;
 	m_socket->SendMsg(pMsg);
 }
 
 Msg *client::GetMsg()
 {
 	assert(m_socket != NULL);
+	if (!m_socket)
+		return NULL;
 	Msg *msg = m_socket->GetMsg();
 	if (!msg)
 		return NULL;
