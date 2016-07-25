@@ -22,10 +22,14 @@ client::~client()
 
 bool client::bOverTime(int64 currenttime, int clientovertime)
 {
-	if (currenttime >= m_pingtime + clientovertime)
+	if (clientovertime > 0)
 	{
-		return true;
+		if (currenttime >= m_pingtime + clientovertime)
+		{
+			return true;
+		}
 	}
+
 	return false;
 }
 
