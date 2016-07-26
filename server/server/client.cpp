@@ -4,7 +4,6 @@ client::client()
 {
 	m_connecttime = 0;
 	m_pingtime = 0;
-	m_removetime = 0;
 	m_socket = NULL;
 	memset(m_ip, 0, sizeof(m_ip));
 }
@@ -13,7 +12,6 @@ client::~client()
 {
 	m_connecttime = 0;
 	m_pingtime = 0;
-	m_removetime = 0;
 	if (m_socket)
 	{
 		lxnet::Socketer::Release(m_socket);
@@ -22,12 +20,17 @@ client::~client()
 	memset(m_ip, 0, sizeof(m_ip));
 }
 
-bool client::bCanRemove(int64 currenttime)
+bool client::bOverTime(int64 currenttime, int clientovertime)
 {
-	if (!bNeedRemove())
-		return false;
+	if (clientovertime > 0)
+	{
+		if (currenttime >= m_pingtime + clientovertime)
+		{
+			return true;
+		}
+	}
 
-	return currenttime >= m_removetime;
+	return false;
 }
 
 void client::SetSocket(lxnet::Socketer *socket)
@@ -41,12 +44,16 @@ void client::SendMsg(Msg *pMsg)
 	if (!pMsg)
 		return;
 	assert(m_socket != NULL);
+	if (!m_socket)
+		return ;
 	m_socket->SendMsg(pMsg);
 }
 
 Msg *client::GetMsg()
 {
 	assert(m_socket != NULL);
+	if (!m_socket)
+		return NULL;
 	Msg *msg = m_socket->GetMsg();
 	if (!msg)
 		return NULL;

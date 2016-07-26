@@ -1,3 +1,10 @@
+/*
+*
+*	消息号定义
+*	对应Msg里面的Type（SetType、GetType）
+*
+*/
+
 #pragma once
 
 enum

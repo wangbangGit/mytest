@@ -8,6 +8,7 @@ clientmgr::clientmgr()
 {
 	m_listen_port = 0;
 	m_needlisten = false;
+	m_clientovertime = 0;
 	m_listen = NULL;
 	m_client_list.clear();
 }
@@ -16,23 +17,25 @@ clientmgr::~clientmgr()
 {
 	m_listen_port = 0;
 	m_needlisten = false;
+	m_clientovertime = 0;
 	m_listen = NULL;
 	m_client_list.clear();
 }
 
-void clientmgr::init(int port)
+bool clientmgr::init(int port, int clientovertime)
 {
 	m_listen_port = port;
+	m_clientovertime = clientovertime;
 
 	m_listen = lxnet::Listener::Create();
 	if (!m_listen)
 	{
 		std::cout << "create Listener failed!" << std::endl;
+		return false;
 	}
-	else
-	{
-		m_needlisten = true;
-	}
+
+	m_needlisten = true;
+	return true;
 }
 
 void clientmgr::release()
@@ -82,7 +85,20 @@ void clientmgr::acceptnewclient()
 		//这边可以做一个client pool
 		client *newclient = new client;
 		assert(newclient != NULL);
+		if (!newclient)
+		{
+			return;
+		}
 
+ 		//启用压缩
+ 		socket->UseCompress();
+ 		//启用解密
+		socket->UseDecrypt();
+ 		//启用加密
+ 		socket->UseEncrypt();
+// 		//设置接手数据字节的临界值
+// 		socket->SetRecvLimit(16 * 1024);
+		//设置发送数据字节的临界值
 		socket->SetSendLimit(-1);
 		char ip[128];
 		socket->GetIP(ip, sizeof(ip) - 1);
@@ -93,7 +109,7 @@ void clientmgr::acceptnewclient()
 		newclient->SetIP(ip);
 		m_client_list.insert(newclient);
 
-		printf("accept new client, ip:%s\n", ip);
+		std::cout << "accept new client, ip:" << ip << std::endl;
 	}
 }
 
@@ -106,20 +122,32 @@ void clientmgr::processallclient()
 		tempiter = iter;
 		iter ++;
 
-		if ((*tempiter)->GetSocket()->IsClose())
+		if ((*tempiter)->bOverTime(g_currenttime,m_clientovertime))
 		{
+			std::cout << "client is over time! ip:" << (*tempiter)->GetIP() << std::endl;
 			OnClientDisconnect(*tempiter);
 			m_client_list.erase((*tempiter));
 			continue;
 		}
 
-		processallclientmsg(*tempiter);
+		if ((*tempiter)->GetSocket()->IsClose())
+		{
+			std::cout << "client is close! ip:" << (*tempiter)->GetIP() << std::endl;
+			OnClientDisconnect(*tempiter);
+			m_client_list.erase((*tempiter));
+			continue;
+		}
+
+		processclientmsg(*tempiter);
 	}
 }
 
-void clientmgr::processallclientmsg(client *cl)
+void clientmgr::processclientmsg(client *cl)
 {
 	assert(cl != NULL);
+	if (cl == NULL)
+		return;
+
 	Msg *pMsg = NULL;
 	while (1)
 	{
@@ -130,20 +158,30 @@ void clientmgr::processallclientmsg(client *cl)
 		{
 		case MSG_PING:
 		{
-			//MsgPing msg;
-			cl->SendMsg(pMsg);
-			cl->SetPingTime(g_currenttime);
+			//收到ping消息的时候，也发送ping消息给前端，然后设置ping消息的接受时间
+			MsgPing* msg = (MsgPing*)pMsg;
+			if (msg)
+			{
+				msg->m_servertime = g_currenttime;
+				cl->SendMsg(pMsg);
+				cl->SetPingTime(g_currenttime);
+			}
 			break;
 		}
 		case MSG_END:
 		{
-			//g_run = false;
 			std::cout << cl->GetIP() << ":get end msg" << std::endl;
 			break;
 		}
 		case MSG_CHAT:
 		{
-			SendMsgToAll(pMsg,cl);
+			//把收到的chat消息发给所有在线的client
+			MessagePack * msg = (MessagePack *)pMsg;
+			char stBuff[521] = { 0 };
+			msg->Begin();
+			msg->GetString(stBuff, 512);
+			std::cout << cl->GetIP() << ":" << stBuff << std::endl;
+			SendMsgToAll(msg);
 			break;
 		}
 		default:
@@ -170,6 +208,8 @@ void clientmgr::SendMsgToAll(Msg *pMsg,client *cl)
 void clientmgr::OnClientDisconnect(client *cl)
 {
 	assert(cl != NULL);
+	if (cl == NULL)
+		return;
 	std::cout << "client disconnect! ip:" << cl->GetIP() << std::endl;
 	cl->~client();
 	delete cl;

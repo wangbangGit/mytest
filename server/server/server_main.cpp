@@ -1,3 +1,9 @@
+/*
+*
+*	Server的main函数
+*
+*/
+
 #include"stdfx.h"
 
 #ifdef _WIN32
@@ -18,34 +24,51 @@ void run()
 	int delay;
 	while (g_run)
 	{
+		//获取当前帧时间
 		g_currenttime = get_millisecond();
+		//网络库run
 		lxnet::net_run();
+		//clientmgr run 逻辑相关的都在这里面跑
 		clientmgr::Instance().run();
+		//clientmgr endrun  主要是将前面加到队列中的msg在这边实际的发送出去
 		clientmgr::Instance().endrun();
+		//检测当前帧使用时间，未达到最小值的时候，sleep
 		delay = static_cast<int>(get_millisecond() - g_currenttime);
 		if (delay < 100)
 			delaytime(100 - delay);
+		else
+			std::cout << "run time out :" << delay << std::endl;
 	}
 }
 
 int main(void)
 {
+	//读取配置文件
 	if (!config::Instance().init())
 	{
 		std::cout << "init config error!" << std::endl;
 		system("pause");
 		return 0;
 	}
-	//初始化
+	//初始化网络库
 	if (!lxnet::net_init(512, 1, 1024 * 32, 100, 1, 4, 1))
 	{
 		std::cout << "init network error!" << std::endl;
 		system("pause");
 		return 0;
 	}
-	clientmgr::Instance().init(config::Instance().GetListenPort());
+	//设置监听端口，创建listener
+	if (!clientmgr::Instance().init(config::Instance().GetListenPort(), config::Instance().GetClientOverTime()))
+	{
+		std::cout << "init clientmgr error!" << std::endl;
+		system("pause");
+		return 0;
+	}
+
 	g_run = true;
+	//死循环
 	run();
+	//循环结束后的资源释放
 	clientmgr::Instance().release();
 	delaytime(1000);
 

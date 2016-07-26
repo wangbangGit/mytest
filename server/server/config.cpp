@@ -36,5 +36,10 @@ bool config::init()
 		return false;
 	}
 
+	if (pinfo->QueryIntAttribute("client_over_time", &m_clientovertime) != XML_SUCCESS)
+	{
+		log_error("query int attribute failed!, attribute name: 'listen_port'");
+		return false;
+	}
 	return true;
 }
