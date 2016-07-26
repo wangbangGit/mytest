@@ -127,6 +127,7 @@
     <ClCompile Include="client.cpp" />
     <ClCompile Include="clientmgr.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="mapinfo.cpp" />
     <ClCompile Include="server_main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -135,6 +136,7 @@
     <ClInclude Include="client.h" />
     <ClInclude Include="clientmgr.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="mapinfo.h" />
     <ClInclude Include="stdfx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

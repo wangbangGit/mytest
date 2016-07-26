@@ -7,6 +7,7 @@ using namespace tinyxml2;
 config::config()
 {
 	m_listen_port = 0;
+	m_clientovertime = 0;
 }
 config::~config()
 {

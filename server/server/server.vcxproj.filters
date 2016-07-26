@@ -30,6 +30,9 @@
     <ClCompile Include="client.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="mapinfo.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdfx.h">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="..\base\msgdef.h">
       <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="mapinfo.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
