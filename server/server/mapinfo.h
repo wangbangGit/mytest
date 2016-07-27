@@ -4,12 +4,12 @@
 *
 */
 
-#pragma once
+/*
+	表中读到的地图信息
+*/
 
-struct cellinfo
-{
-	bool isbar; //是否阻挡点
-};
+#pragma once
+#include "string"
 
 class mapinfo
 {
@@ -17,14 +17,15 @@ public:
 	mapinfo();
 	~mapinfo();
 
-	bool init(int mapid, int width, int height);
+	bool init(std::string bar_filename);
 	bool load();
-	void addbar(int row,int col);
+	void addbar(int row,int col); //添加阻挡点
 
 private:
 	int m_mapid;
 	int m_width;
 	int m_height;
 
-	cellinfo *m_cellinfo;
+	bool *m_barinfo; //阻挡信息
+	std::string m_bar_filename;
 };
