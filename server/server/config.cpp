@@ -16,7 +16,7 @@ config::~config()
 
 bool config::init()
 {
-	const char *filename = "config/config.xml";
+	const char *filename = "./config/config.xml";
 	XMLDocument doc;
 	if (doc.LoadFile(filename) != XML_SUCCESS)
 	{

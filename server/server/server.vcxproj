@@ -124,11 +124,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cell.cpp" />
     <ClCompile Include="client.cpp" />
     <ClCompile Include="clientmgr.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="mapconfig.cpp" />
     <ClCompile Include="mapinfo.cpp" />
+    <ClCompile Include="playerobj.cpp" />
     <ClCompile Include="scene.cpp" />
     <ClCompile Include="scenemgr.cpp" />
     <ClCompile Include="server_main.cpp" />
@@ -136,11 +138,13 @@
   <ItemGroup>
     <ClInclude Include="..\base\cmd.h" />
     <ClInclude Include="..\base\msgdef.h" />
+    <ClInclude Include="cell.h" />
     <ClInclude Include="client.h" />
     <ClInclude Include="clientmgr.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="mapconfig.h" />
     <ClInclude Include="mapinfo.h" />
+    <ClInclude Include="playerobj.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scenemgr.h" />
     <ClInclude Include="stdfx.h" />
