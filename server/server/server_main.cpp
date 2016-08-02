@@ -41,8 +41,21 @@ void run()
 	}
 }
 
+bool init()
+{
+	if (!mapconfig::Instance().init())
+	{
+		std::cout << "init map failed!" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 int main(void)
 {
+	std::cout << "server start!" << std::endl;
+
 	//读取配置文件
 	if (!config::Instance().init())
 	{
@@ -65,6 +78,13 @@ int main(void)
 		return 0;
 	}
 
+	if (!init())
+	{
+		std::cout << "server init failed!" << std::endl;
+		system("pause");
+		return 0;
+	}
+	
 	g_run = true;
 	//死循环
 	run();

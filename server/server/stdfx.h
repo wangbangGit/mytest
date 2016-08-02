@@ -8,3 +8,4 @@
 #include"client.h"
 #include"clientmgr.h"
 #include"crosslib.h"
+#include"mapconfig.h"

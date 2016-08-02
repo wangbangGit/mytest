@@ -16,6 +16,12 @@
     <Filter Include="base">
       <UniqueIdentifier>{94b6f50d-23c8-49a3-b9f5-b7e95f7f57be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="场景地图">
+      <UniqueIdentifier>{ee7a0147-f2f1-4a54-91f2-9586188fcd2f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="玩家对象">
+      <UniqueIdentifier>{af62f7a1-f887-4a21-94ee-bacda25be0e0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="server_main.cpp">
@@ -29,6 +35,24 @@
     </ClCompile>
     <ClCompile Include="client.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="mapinfo.cpp">
+      <Filter>场景地图</Filter>
+    </ClCompile>
+    <ClCompile Include="mapconfig.cpp">
+      <Filter>场景地图</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>场景地图</Filter>
+    </ClCompile>
+    <ClCompile Include="playerobj.cpp">
+      <Filter>玩家对象</Filter>
+    </ClCompile>
+    <ClCompile Include="cell.cpp">
+      <Filter>场景地图</Filter>
+    </ClCompile>
+    <ClCompile Include="scenemgr.cpp">
+      <Filter>场景地图</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -49,6 +73,24 @@
     </ClInclude>
     <ClInclude Include="..\base\msgdef.h">
       <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="mapinfo.h">
+      <Filter>场景地图</Filter>
+    </ClInclude>
+    <ClInclude Include="mapconfig.h">
+      <Filter>场景地图</Filter>
+    </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>场景地图</Filter>
+    </ClInclude>
+    <ClInclude Include="playerobj.h">
+      <Filter>玩家对象</Filter>
+    </ClInclude>
+    <ClInclude Include="cell.h">
+      <Filter>场景地图</Filter>
+    </ClInclude>
+    <ClInclude Include="scenemgr.h">
+      <Filter>场景地图</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
